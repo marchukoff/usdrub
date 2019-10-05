@@ -23,8 +23,9 @@ func init() {
 	} else { // Unix-подобная система
 		prompt = fmt.Sprintf(prompt, "Ctrl+D")
 	}
-	cbr := getCbr()
-	transferRate = getCbrRate("USD", cbr)
+	cbr := new(CBR)
+	cbr.New()
+	transferRate = cbr.Rate("USD")
 }
 
 func main() {
@@ -78,7 +79,7 @@ func convert(money chan Money, currency chan Money) {
 	fmt.Println()
 }
 
-func getCbr() *CBR {
+func (c *CBR) New() {
 	resp, err := http.Get(url)
 	if err != nil {
 		panic(err)
@@ -90,19 +91,18 @@ func getCbr() *CBR {
 		panic(err)
 	}
 
-	cbr := new(CBR)
-	err = json.Unmarshal(body, cbr)
+	err = json.Unmarshal(body, c)
 	if err != nil {
 		panic(err)
 	}
-	return cbr
 }
 
-func getCbrRate(code string, base *CBR) float64 {
-	var res float64 = 0.0
-	currency, ok := base.Valute[code]
-	if ok == true {
-		res = currency.Value
+func (c *CBR) Rate(code string) float64 {
+	currency, ok := c.Valute[code]
+	switch {
+	case ok == true:
+		return currency.Value
+	default:
+		return 0.0
 	}
-	return res
 }
