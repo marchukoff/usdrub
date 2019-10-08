@@ -64,7 +64,7 @@ func convert(money chan Money, currency chan Money) {
 		}
 		var value float64
 		code := "RUB"
-		if strings.HasPrefix(line, "$") || strings.HasSuffix(line, "$\n") {
+		if i := strings.Index(line, "$"); i != -1 {
 			code = "USD"
 			line = strings.Replace(line, "$", "", 1)
 		}
